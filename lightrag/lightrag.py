@@ -166,7 +166,7 @@ class LightRAG:
         loop = always_get_an_event_loop()
         return loop.run_until_complete(self.ainsert(string_or_strings))
 
-    async def ainsert(self, string_or_strings):
+    async def ainsert(self, string_or_strings, original_doc_id = ""):
         try:
             if isinstance(string_or_strings, str):
                 string_or_strings = [string_or_strings]
@@ -190,7 +190,7 @@ class LightRAG:
                         "full_doc_id": doc_key,
                     }
                     for dp in chunking_by_token_size(
-                        doc["content"],
+                        f"[doc_id={original_doc_id}] {doc['content']}",
                         overlap_token_size=self.chunk_overlap_token_size,
                         max_token_size=self.chunk_token_size,
                         tiktoken_model=self.tiktoken_model_name,
