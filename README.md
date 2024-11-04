@@ -22,6 +22,7 @@ This repository hosts the code of LightRAG. The structure of this code is based 
 </div>
 
 ## 🎉 News
+- [x] [2024.11.04]🎯📢You can [use Neo4J for Storage](https://github.com/HKUDS/LightRAG/edit/main/README.md#using-neo4j-for-storage) now.
 - [x] [2024.10.29]🎯📢LightRAG now supports multiple file types, including PDF, DOC, PPT, and CSV via `textract`.
 - [x] [2024.10.20]🎯📢We’ve added a new feature to LightRAG: Graph Visualization.
 - [x] [2024.10.18]🎯📢We’ve added a link to a [LightRAG Introduction Video](https://youtu.be/oageL-1I0GE). Thanks to the author!
@@ -188,6 +189,34 @@ rag = LightRAG(
     ),
 )
 ```
+
+### Using Neo4J for Storage
+
+* For production level scenarios you will most likely want to leverage an enterprise solution
+* for KG storage. Running Neo4J in Docker is recommended for seamless local testing.  
+* See: https://hub.docker.com/_/neo4j
+
+
+```python
+export NEO4J_URI="neo4j://localhost:7687"
+export NEO4J_USERNAME="neo4j"
+export NEO4J_PASSWORD="password"
+
+When you launch the project be sure to override the default KG: NetworkS
+by specifying kg="Neo4JStorage".
+
+# Note: Default settings use NetworkX
+#Initialize LightRAG with Neo4J implementation. 
+WORKING_DIR = "./local_neo4jWorkDir"
+
+rag = LightRAG(
+    working_dir=WORKING_DIR,
+    llm_model_func=gpt_4o_mini_complete,  # Use gpt_4o_mini_complete LLM model
+    kg="Neo4JStorage", #<-----------override KG default
+    log_level="DEBUG"  #<-----------override log_level default
+)
+```
+see test_neo4j.py for a working example.
 
 ### Increasing context size
 In order for LightRAG to work context should be at least 32k tokens. By default Ollama models have context size of 8k. You can achieve this using one of two ways:
