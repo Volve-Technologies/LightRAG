@@ -23,6 +23,8 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
     retry_if_exception_type,
+    wait_exponential_jitter,
+    stop_after_delay
 )
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
@@ -78,9 +80,12 @@ async def openai_complete_if_cache(
 
 
 @retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=4, max=10),
-    retry=retry_if_exception_type((RateLimitError, APIConnectionError, Timeout)),
+    retry=retry_if_exception_type(RateLimitError),
+    wait=wait_exponential_jitter(initial=1, max=60),
+    stop=stop_after_delay(3600),
+    before_sleep=lambda retry_state: logging.warning(
+        f"Rate limit exceeded for azure_openai_complete_if_cache. Retrying in {retry_state.next_action.sleep} seconds..."
+    ),
 )
 async def azure_openai_complete_if_cache(
     model,
@@ -478,7 +483,14 @@ async def gpt_4o_mini_complete(
         **kwargs,
     )
 
-
+@retry(
+    retry=retry_if_exception_type(RateLimitError),
+    wait=wait_exponential_jitter(initial=1, max=60),
+    stop=stop_after_delay(3600),
+    before_sleep=lambda retry_state: logging.warning(
+        f"Rate limit exceeded for azure_openai_complete. Retrying in {retry_state.next_action.sleep} seconds..."
+    ),
+)
 async def azure_openai_complete(
     prompt, system_prompt=None, history_messages=[], **kwargs
 ) -> str:
@@ -555,9 +567,12 @@ async def openai_embedding(
 
 @wrap_embedding_func_with_attrs(embedding_dim=1536, max_token_size=8192)
 @retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=4, max=10),
-    retry=retry_if_exception_type((RateLimitError, APIConnectionError, Timeout)),
+    retry=retry_if_exception_type(RateLimitError),
+    wait=wait_exponential_jitter(initial=1, max=60),
+    stop=stop_after_delay(3600),
+    before_sleep=lambda retry_state: logging.warning(
+        f"Rate limit exceeded for azure_openai_embedding. Retrying in {retry_state.next_action.sleep} seconds..."
+    ),
 )
 async def azure_openai_embedding(
     texts: list[str],

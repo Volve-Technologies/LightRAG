@@ -1,10 +1,12 @@
 import os
 import asyncio
+import re
 from lightrag import LightRAG, QueryParam
-from lightrag.llm import gpt_4o_mini_complete
+from lightrag.llm import azure_openai_complete, azure_openai_embedding
+from dataclasses import field
 from dsrag.document_parsing import extract_text_from_pdf, extract_text_from_docx
 
-WORKING_DIR = "./ankers_hus"
+WORKING_DIR = "./ankers_hus_docs"
 #WORKING_DIR = "./test"
 
 if not os.path.exists(WORKING_DIR):
@@ -12,11 +14,23 @@ if not os.path.exists(WORKING_DIR):
 
 rag = LightRAG(
     working_dir=WORKING_DIR,
-    #llm_model_func=gpt_4o_mini_complete,
-    # llm_model_func=gpt_4o_complete
+    llm_model_func=azure_openai_complete,
+embedding_func=azure_openai_embedding
 )
 
-async def insert_file_into_rag(rag):
+
+def separate_entities_and_sources(input_data):
+    # Using regular expressions to split the input string by "Entities" and "Sources"
+    entities = re.search(r"-----Entities-----(.*?)-----Sources-----", input_data, re.DOTALL)
+    sources = re.search(r"-----Sources-----(.*)", input_data, re.DOTALL)
+
+    # Extract and strip the matches, if found
+    graph = entities.group(1).strip() if entities else ""
+    context = sources.group(1).strip() if sources else ""
+
+    return graph, context
+
+def insert_file_into_rag(rag):
     # Open and read the file synchronously
     #with open("/Users/abylikhsanov/Documents/volve/rag_eval_data/supreme_court/out/output.txt", mode='r') as f:
     #    content = f.read()  # Read the file content synchronously
@@ -31,12 +45,12 @@ async def insert_file_into_rag(rag):
 
                     if file_name.endswith('.docx'):
                         text, _ = extract_text_from_docx(file_path)
-                        await rag.ainsert(text)
+                        rag.insert(text, original_doc_id=f"{file_name}")
                     elif file_name.endswith('.pdf'):
                         text, _ = extract_text_from_pdf(file_path)
-                        await rag.ainsert(text)
-                except:
-                    print(f"Error reading {file_name}")
+                        rag.insert(text, original_doc_id=f"{file_name}")
+                except Exception as e:
+                    print(f"Error reading {str(e)}")
                     continue
             else:
                 print(f"Unsupported file type: {file_name}")
@@ -47,7 +61,7 @@ async def insert_file_into_rag(rag):
     #await rag.ainsert(content)
 
 #asyncio.run(insert_file_into_rag(rag))
-
+insert_file_into_rag(rag)
 
 # Perform local search
 #print(
@@ -60,8 +74,9 @@ async def insert_file_into_rag(rag):
 #)
 
 # Perform hybrid search
+result = rag.query("Identify statements related to contract options or their prices", param=QueryParam(mode="hybrid", only_need_context=True))
+graph, context = separate_entities_and_sources(result)
+
 print("\n\n\n\n\n\n\n")
-print(
-    rag.query("Identify any inconsistencies across the documents", param=QueryParam(mode="hybrid", only_need_context=False))
-)
+print(f"Graph: {graph}\n\n\n\nsource: {context}")
 print("\n\n\n\n\n\n\n")

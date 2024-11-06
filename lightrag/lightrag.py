@@ -162,9 +162,9 @@ class LightRAG:
             )
         )
 
-    def insert(self, string_or_strings):
+    def insert(self, string_or_strings, original_doc_id = ""):
         loop = always_get_an_event_loop()
-        return loop.run_until_complete(self.ainsert(string_or_strings))
+        return loop.run_until_complete(self.ainsert(string_or_strings, original_doc_id))
 
     async def ainsert(self, string_or_strings, original_doc_id = ""):
         try:

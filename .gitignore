@@ -6,3 +6,8 @@ lightrag-dev/
 .idea/
 dist/
 .venv/
+.DS_Store
+build/
+examples/.DS_Store
+examples/ankers_hus/
+examples/ankers_hus_docs/
