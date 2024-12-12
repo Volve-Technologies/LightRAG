@@ -49,6 +49,9 @@ def insert_file_into_rag(rag):
                     elif file_name.endswith('.pdf'):
                         text, _ = extract_text_from_pdf(file_path)
                         rag.insert(text, original_doc_id=f"{file_name}")
+                    elif file_name.endswith('.txt'):
+                        with open(file_path) as f:
+                            rag.insert(f.read())
                 except Exception as e:
                     print(f"Error reading {str(e)}")
                     continue
@@ -74,7 +77,7 @@ insert_file_into_rag(rag)
 #)
 
 # Perform hybrid search
-result = rag.query("Identify statements related to contract options or their prices", param=QueryParam(mode="hybrid", only_need_context=True))
+result = rag.query("Hva slags opsjoner", param=QueryParam(mode="hybrid", only_need_context=True))
 graph, context = separate_entities_and_sources(result)
 
 print("\n\n\n\n\n\n\n")
