@@ -1,10 +1,13 @@
 import os
 import asyncio
 import re
+from dotenv import load_dotenv
 from lightrag import LightRAG, QueryParam
 from lightrag.llm import azure_openai_complete, azure_openai_embedding
 from dataclasses import field
-from dsrag.document_parsing import extract_text_from_pdf, extract_text_from_docx
+from dsrag.dsparse.file_parsing.non_vlm_file_parsing import extract_text_from_pdf, extract_text_from_docx
+
+load_dotenv()
 
 WORKING_DIR = "./ankers_hus_docs"
 #WORKING_DIR = "./test"
