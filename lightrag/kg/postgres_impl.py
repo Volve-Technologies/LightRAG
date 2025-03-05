@@ -775,7 +775,7 @@ class PGGraphStorage(BaseGraphStorage):
         props = []
         # wrap property key in backticks to escape
         for k, v in properties.items():
-            prop = f"`{k}`: {json.dumps(v)}"
+            prop = f'{k}: {json.dumps(v)}'
             props.append(prop)
         if _id is not None and "id" not in properties:
             props.append(
@@ -979,16 +979,41 @@ class PGGraphStorage(BaseGraphStorage):
         """
         label = self._encode_graph_label(source_node_id.strip('"'))
 
-        query = """SELECT * FROM cypher('%s', $$
-                      MATCH (n:Entity {node_id: "%s"})
-                      OPTIONAL MATCH (n)-[]-(connected)
-                      RETURN n, connected
-                    $$) AS (n agtype, connected agtype)""" % (
-            self.graph_name,
-            label,
-        )
+        query_get_node = f"""
+            SELECT *
+            FROM cypher('{self.graph_name}', $$
+                MATCH (n:Entity {{ node_id: "{label}" }})
+                RETURN n
+            $$) AS (n agtype)
+        """
+        results_node = await self._query(query_get_node)
 
-        results = await self._query(query)
+        # Extract the single node from results_node (assuming there's exactly one)
+        if not results_node:
+            # Handle the case where no node is found
+            return []
+
+        main_node = results_node[0]["n"]
+
+        # Step 2: Get the connected nodes
+        query_get_connected = f"""
+            SELECT *
+            FROM cypher('{self.graph_name}', $$
+                MATCH (n:Entity {{ node_id: "{label}" }})-[]-(connected)
+                RETURN connected
+            $$) AS (connected agtype)
+        """
+        results_connected = await self._query(query_get_connected)
+
+        # Combine to match the original structure
+        results = []
+        for row in results_connected:
+            results.append({
+                "n": main_node,
+                "connected": row["connected"]
+            })
+
+        #print(f"results: {results}")
         edges = []
         for record in results:
             source_node = record["n"] if record["n"] else None

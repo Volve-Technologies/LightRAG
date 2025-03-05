@@ -224,32 +224,34 @@ Output:
 PROMPTS["keywords_extraction_examples"] = [
     """Example 1:
 
-Query: "How does international trade influence global economic stability?"
+Query: "How do building regulations influence the global construction sector?"
 ################
 Output:
 {
-  "high_level_keywords": ["International trade", "Global economic stability", "Economic impact"],
-  "low_level_keywords": ["Trade agreements", "Tariffs", "Currency exchange", "Imports", "Exports"]
+  "high_level_keywords": ["Building regulations", "Construction sector", "Global impact"],
+  "low_level_keywords": ["Compliance standards", "Safety codes", "Permits", "Zoning laws", "Inspection processes"]
 }
-#############################""",
-    """Example 2:
+#############################
 
-Query: "What are the environmental consequences of deforestation on biodiversity?"
+Example 2:
+
+Query: "What are the environmental consequences of using concrete in large-scale projects?"
 ################
 Output:
 {
-  "high_level_keywords": ["Environmental consequences", "Deforestation", "Biodiversity loss"],
-  "low_level_keywords": ["Species extinction", "Habitat destruction", "Carbon emissions", "Rainforest", "Ecosystem"]
+  "high_level_keywords": ["Environmental consequences", "Concrete usage", "Large-scale projects"],
+  "low_level_keywords": ["Carbon footprint", "Sustainable materials", "Greenhouse gas emissions", "Recycling methods", "Cement production"]
 }
-#############################""",
-    """Example 3:
+#############################
 
-Query: "What is the role of education in reducing poverty?"
+Example 3:
+
+Query: "How does workforce training contribute to improved safety on construction sites?"
 ################
 Output:
 {
-  "high_level_keywords": ["Education", "Poverty reduction", "Socioeconomic development"],
-  "low_level_keywords": ["School access", "Literacy rates", "Job training", "Income inequality"]
+  "high_level_keywords": ["Workforce training", "Safety improvements", "Construction sites"],
+  "low_level_keywords": ["Certification programs", "Accident prevention", "Protective equipment", "Risk assessment", "Safety protocols"]
 }
 #############################""",
 ]

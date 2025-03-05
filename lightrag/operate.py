@@ -892,6 +892,7 @@ async def mix_kg_vector_query(
                     chunk_with_time = {
                         "content": chunk["content"],
                         "created_at": result.get("created_at", None),
+                        "doc_id": chunk.get("full_doc_id", None),
                     }
                     valid_chunks.append(chunk_with_time)
 
@@ -911,14 +912,16 @@ async def mix_kg_vector_query(
             formatted_chunks = []
             for c in maybe_trun_chunks:
                 chunk_text = c["content"]
+                doc_id = c['doc_id']
                 if c["created_at"]:
                     chunk_text = f"[Created at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(c['created_at']))}]\n{chunk_text}"
-                formatted_chunks.append(chunk_text)
+                formatted_chunks.append({"doc_id": doc_id, "content": chunk_text})
 
             logger.debug(
                 f"Truncate chunks from {len(chunks)} to {len(formatted_chunks)} (max tokens:{query_param.max_token_for_text_unit})"
             )
-            return "\n--New Chunk--\n".join(formatted_chunks)
+            chunk = "\n--New Chunk--\n" + str(formatted_chunks)
+            return chunk
         except Exception as e:
             logger.error(f"Error in get_vector_context: {e}")
             return None
@@ -1066,10 +1069,6 @@ async def _build_query_context(
     -----Relationships-----
     ```csv
     {relations_context}
-    ```
-    -----Sources-----
-    ```csv
-    {text_units_context}
     ```
     """.strip()
     return result
